@@ -5,7 +5,7 @@
 ![VB.NET](https://img.shields.io/badge/VB.NET-.NET%2010-512BD4?logo=dotnet&logoColor=white)
 ![WinForms](https://img.shields.io/badge/UI-WinForms-512BD4)
 ![API](https://img.shields.io/badge/data-API--driven-0A66C2)
-![Version](https://img.shields.io/badge/validated-v1.04-16A34A)
+![Version](https://img.shields.io/badge/validated-v1.05-16A34A)
 ![Status](https://img.shields.io/badge/status-active%20development-orange)
 
 ## About the project
@@ -16,11 +16,21 @@ The project combines historical match data, pre-match information and betting-ma
 
 This repository is the **public showcase** for the project. The application source code, local data store, API credentials and proprietary datasets remain private.
 
-## Current milestone — v1.04
+## Current milestone — v1.05
 
-The latest validated milestone introduces a **Daily Betting Desk** that brings several previously separate research layers into one operational workflow.
+The latest validated milestone turns Football Hunter's growing set of research tools into a clearer, observable daily workflow.
 
-The user can choose a date/time interval — with a quick preset for the **next 168 hours** — and run a single analysis that combines:
+The main navigation is now organised around three distinct areas:
+
+- **Day to day** — Dashboard, Daily Betting Desk, opportunity exploration and Auto Pilot;
+- **Data and maintenance** — coverage, catalogue, historical imports, odds collection and data-source configuration;
+- **Laboratory** — historical statistics, pre-match context, odds movement, backtesting and model discovery.
+
+Long-running local operations now expose visible progress, elapsed time and the current processing stage instead of leaving the user uncertain about whether the application is still working.
+
+### Daily Betting Desk and smart odds refresh
+
+The **Daily Betting Desk** brings several previously separate research layers into one operational workflow. The user can choose a date/time interval — with a quick preset for the **next 168 hours** — and run a single analysis that combines:
 
 1. validated model predictions;
 2. current odds and fair-price analysis;
@@ -36,9 +46,20 @@ The result is split between:
 
 The Daily Betting Desk remains a **research and paper-simulation layer**. It does not place real bets.
 
+Version 1.05 adds a **smart odds-refresh pipeline** that prioritises the most relevant Scanner signals and prices closest to expiry while protecting the API quota. It also makes the relationship between a new period analysis and previously frozen results explicit: a new analysis creates a fresh shortlist, while saved prospective observations can be consulted independently at any time.
+
+### Prospective ledger and Champion health
+
+The milestone also adds:
+
+- a prospective ledger that freezes each shortlist before the match and resolves it later against real results;
+- first-recommendation and first-strong-signal views without backfilling earlier history;
+- per-Champion health screens covering calibration, maturity, drift, coverage and integrity;
+- a simplified related-tools menu for reaching calibration, cohort audit, policy and correlation analysis without navigating through a long chain of windows.
+
 ### Example validated run
 
-During validation of v1.04, a 168-hour analysis covered **1,716 scheduled matches**, found **66 with usable odds**, produced **30 candidates** and promoted **12** to the final analytical shortlist. A shorter ~24-hour test correctly reduced the universe to **42 matches**, **31 with odds**, **3 candidates** and **2 promoted selections**, confirming that the configurable time window is applied to the complete pipeline.
+During validation of v1.05, one 168-hour analysis covered **1,703 scheduled matches**, found **185 with usable odds**, produced **41 candidates** and retained **10 recommendations** after the current market-quality and risk rules. The complete pipeline remained observable while running and the resulting shortlist was stored independently for later prospective resolution.
 
 These figures are examples from one local validation run, not expected performance claims.
 
@@ -61,7 +82,7 @@ The current workflow includes:
 - calibration monitoring;
 - cohort-integrity auditing.
 
-A validated calibration cohort currently contains **6,302 frozen predictions across 1,714 matches and four Champion models**, with the cohort audit reporting **0 critical integrity issues and 0 warnings** at the time of validation.
+A validated calibration cohort currently contains **6,418 frozen predictions across 1,750 matches and four Champion models**, with **68 resolved observations**. The cohort audit reported **0 critical integrity issues and 0 warnings** at the time of v1.05 validation.
 
 ## Model discovery and Champion workflow
 
@@ -145,7 +166,8 @@ These layers are deliberately read-only or simulated and do not alter historical
 | v1.01 | Prospective evidence monitoring |
 | v1.02 | Prospective calibration workflow |
 | v1.03 | Calibration-cohort integrity audit |
-| **v1.04** | **Configurable Daily Betting Desk and ranked period shortlist** |
+| v1.04 | Configurable Daily Betting Desk and ranked period shortlist |
+| **v1.05** | **Smart odds refresh, prospective ledger, Champion health, observable progress and simplified navigation** |
 
 ## Application areas
 
@@ -175,7 +197,7 @@ Freezing model outputs before matches and tracking their subsequent performance,
 
 ### Daily Betting Desk
 
-Running the validated prediction, odds, opportunity and simulated-risk pipeline over a user-selected time interval and presenting the strongest current candidates in one place.
+Running the validated prediction, smart odds-refresh, opportunity and simulated-risk pipeline over a user-selected time interval, presenting the strongest current candidates and preserving their prospective observations for later resolution.
 
 ## Technology
 
@@ -219,15 +241,37 @@ The current approach emphasises:
 
 ## Project status
 
-🟠 **Active development — latest validated milestone: v1.04**
+🟠 **Active development — latest validated milestone: v1.05**
 
 The application is already being used to collect and analyse real football data, run model searches, freeze prospective predictions and generate simulated analytical shortlists from current odds.
 
-The next development stages continue to focus on model-health monitoring, prospective evidence and stronger decision auditing before any consideration of real-money automation.
+The next development stages continue to focus on accumulating prospective evidence, monitoring Champion health and strengthening decision auditing before any consideration of real-money automation.
 
 ## Screenshots
 
-Selected screenshots will be added to this showcase as the public presentation evolves. They will focus on the interface, analysis workflows, prospective validation and Daily Betting Desk without exposing private credentials, source code or sensitive local data.
+### Daily workflow and reorganised navigation
+
+The main interface separates daily decisions from data maintenance and research tools, keeping advanced screens available without crowding the primary workflow.
+
+![Football Hunter v1.05 dashboard and reorganised navigation](docs/images/v105-navigation-dashboard.png)
+
+### Observable long-running operations
+
+Coverage and other heavy local analyses now show the current stage, elapsed time and visible progress while keeping the interface responsive.
+
+![Football Hunter v1.05 coverage analysis with visible progress](docs/images/v105-coverage-progress.png)
+
+### Daily Betting Desk
+
+The Daily Betting Desk ranks the best current analytical candidates and retains alternatives with an explicit reason for not promoting them.
+
+![Football Hunter v1.05 Daily Betting Desk](docs/images/v105-daily-betting-desk.png)
+
+### Prospective research laboratory
+
+The laboratory keeps real prospective records, model calibration, fair-price analysis, shadow validation, paper simulation and risk research separate but accessible from one workspace.
+
+![Football Hunter v1.05 prospective research laboratory](docs/images/v105-prospective-lab.png)
 
 ## About this repository
 
