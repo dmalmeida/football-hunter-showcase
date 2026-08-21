@@ -5,7 +5,7 @@
 ![VB.NET](https://img.shields.io/badge/VB.NET-.NET%2010-512BD4?logo=dotnet&logoColor=white)
 ![WinForms](https://img.shields.io/badge/UI-WinForms-512BD4)
 ![API](https://img.shields.io/badge/data-API--driven-0A66C2)
-![Version](https://img.shields.io/badge/validated-v1.05-16A34A)
+![Version](https://img.shields.io/badge/validated-v1.06-16A34A)
 ![Status](https://img.shields.io/badge/status-active%20development-orange)
 
 ## About the project
@@ -16,17 +16,52 @@ The project combines historical match data, pre-match information and betting-ma
 
 This repository is the **public showcase** for the project. The application source code, local data store, API credentials and proprietary datasets remain private.
 
-## Current milestone — v1.05
+## Current milestone — v1.06
 
-The latest validated milestone turns Football Hunter's growing set of research tools into a clearer, observable daily workflow.
+Version **1.06** adds a temporal **Drift & Stability Monitor** on top of the prospective Champion-monitoring workflow introduced in v1.05.
 
-The main navigation is now organised around three distinct areas:
+The goal is to answer a question that historical backtests alone cannot answer reliably: **is a validated model still behaving in the same way over time?**
+
+The monitor uses only predictions that were frozen prospectively before matches. It does not recalibrate, replace or disable models automatically.
+
+For each active Champion, Football Hunter now compares recent and previous chronological windows using:
+
+- Brier score;
+- calibration error (ECE);
+- Brier gain versus the stored baseline;
+- Log Loss;
+- mean predicted probability;
+- observed outcome frequency;
+- model/cohort fingerprint integrity.
+
+The current diagnostic states are:
+
+- **Collecting** — insufficient prospective observations;
+- **Descriptive** — enough data for an initial temporal comparison, but not for formal alerts;
+- **Stable** — no current monitoring threshold is triggered;
+- **Watch** — one or more monitoring thresholds deserve attention;
+- **Deterioration** — a stronger threshold is exceeded and the model should be reviewed manually;
+- **Integrity** — the prospective cohort no longer matches the active frozen model fingerprint.
+
+At the v1.06 validation point, the four active Champion models had **892 resolved prospective observations in total**, all four had two comparable temporal windows and cohort integrity remained **OK**. Two models were flagged for stronger deterioration review and two for monitoring. These are diagnostic signals, not claims of profitability and not automatic model-replacement decisions.
+
+### Temporal windows
+
+The detailed view also exposes non-overlapping chronological blocks of 20 resolved predictions. This makes it possible to inspect how calibration and predictive error evolved through time rather than relying only on one aggregate score.
+
+The latest incomplete block is explicitly shown as **forming**, so partial windows are not silently treated as complete samples.
+
+## v1.05 — observable daily workflow
+
+The previous milestone turned Football Hunter's growing set of research tools into a clearer, observable daily workflow.
+
+The main navigation is organised around three distinct areas:
 
 - **Day to day** — Dashboard, Daily Betting Desk, opportunity exploration and Auto Pilot;
 - **Data and maintenance** — coverage, catalogue, historical imports, odds collection and data-source configuration;
-- **Laboratory** — historical statistics, pre-match context, odds movement, backtesting and model discovery.
+- **Laboratory** — historical statistics, pre-match context, odds movement, backtesting, model discovery and Champion monitoring.
 
-Long-running local operations now expose visible progress, elapsed time and the current processing stage instead of leaving the user uncertain about whether the application is still working.
+Long-running local operations expose visible progress, elapsed time and the current processing stage instead of leaving the user uncertain about whether the application is still working.
 
 ### Daily Betting Desk and smart odds refresh
 
@@ -42,32 +77,37 @@ The **Daily Betting Desk** brings several previously separate research layers in
 The result is split between:
 
 - **recommended candidates** — signals that pass the current model, market-quality and risk rules;
-- **watch / not promoted** — signals that are retained with an explicit reason for exclusion or caution.
+- **watch / not promoted** — signals retained with an explicit reason for exclusion or caution.
 
 The Daily Betting Desk remains a **research and paper-simulation layer**. It does not place real bets.
 
-Version 1.05 adds a **smart odds-refresh pipeline** that prioritises the most relevant Scanner signals and prices closest to expiry while protecting the API quota. It also makes the relationship between a new period analysis and previously frozen results explicit: a new analysis creates a fresh shortlist, while saved prospective observations can be consulted independently at any time.
+The smart odds-refresh pipeline prioritises the most relevant Scanner signals and prices closest to expiry while protecting the API quota. It does not try to keep every price below an arbitrary freshness threshold.
 
-### Prospective ledger and Champion health
+### Prospective ledger
 
-The milestone also adds:
+The Daily Betting Desk can freeze a shortlist before matches and resolve it later against real results.
 
-- a prospective ledger that freezes each shortlist before the match and resolves it later against real results;
-- first-recommendation and first-strong-signal views without backfilling earlier history;
-- per-Champion health screens covering calibration, maturity, drift, coverage and integrity;
-- a simplified related-tools menu for reaching calibration, cohort audit, policy and correlation analysis without navigating through a long chain of windows.
+The ledger keeps:
 
-### Example validated run
+- the first recommendation for each match/target;
+- the first time a signal became strong;
+- every later observation for audit purposes;
+- the observed market price and simulated stake at capture time;
+- the final hit/miss outcome and theoretical P/L after settlement.
 
-During validation of v1.05, one 168-hour analysis covered **1,703 scheduled matches**, found **185 with usable odds**, produced **41 candidates** and retained **10 recommendations** after the current market-quality and risk rules. The complete pipeline remained observable while running and the resulting shortlist was stored independently for later prospective resolution.
+Repeated analyses therefore remain auditable without counting the same recommendation multiple times in the primary performance statistics.
 
-These figures are examples from one local validation run, not expected performance claims.
+### Champion health
+
+Champion-level health screens combine the frozen model Registry with prospective calibration, maturity, reliability, coverage and fingerprint integrity.
+
+Version 1.06 extends that health layer from an aggregate snapshot into explicit time-window monitoring.
 
 ## Prospective validation
 
 A major change in the project since the early backtesting stages is the addition of a prospective research workflow.
 
-Football Hunter can now freeze model predictions before matches and follow them forward without rewriting the historical decision. This allows the application to compare what a model actually said in advance with what happened later.
+Football Hunter can freeze model predictions before matches and follow them forward without rewriting the historical decision. This allows the application to compare what a model actually said in advance with what happened later.
 
 The current workflow includes:
 
@@ -80,9 +120,9 @@ The current workflow includes:
 - policy comparison;
 - prospective evidence tracking;
 - calibration monitoring;
-- cohort-integrity auditing.
-
-A validated calibration cohort currently contains **6,418 frozen predictions across 1,750 matches and four Champion models**, with **68 resolved observations**. The cohort audit reported **0 critical integrity issues and 0 warnings** at the time of v1.05 validation.
+- cohort-integrity auditing;
+- Champion health monitoring;
+- temporal drift and stability monitoring.
 
 ## Model discovery and Champion workflow
 
@@ -117,8 +157,10 @@ Important evaluation concepts include:
 - edge versus market price;
 - expected value;
 - calibration metrics such as Brier score and ECE;
+- Log Loss;
 - ROI and robustness;
 - minimum sample-size requirements;
+- temporal stability;
 - prevention of data leakage.
 
 A high historical hit rate by itself is not considered sufficient evidence that a model is useful.
@@ -150,6 +192,7 @@ These layers are deliberately read-only or simulated and do not alter historical
 - Freeze prospective predictions and audit their integrity later.
 - Compare model probability with fair and available market prices.
 - Rank current opportunities while explaining why alternatives were rejected.
+- Monitor whether validated models remain stable through time.
 - Keep historical calculations free from future information.
 
 ## Selected development milestones
@@ -167,7 +210,8 @@ These layers are deliberately read-only or simulated and do not alter historical
 | v1.02 | Prospective calibration workflow |
 | v1.03 | Calibration-cohort integrity audit |
 | v1.04 | Configurable Daily Betting Desk and ranked period shortlist |
-| **v1.05** | **Smart odds refresh, prospective ledger, Champion health, observable progress and simplified navigation** |
+| v1.05 | Smart odds refresh, prospective ledger, Champion health, observable progress and simplified navigation |
+| **v1.06** | **Champion drift and stability monitoring with chronological prospective windows** |
 
 ## Application areas
 
@@ -193,7 +237,7 @@ Automatically searching a much larger model space than would be practical throug
 
 ### Prospective monitoring
 
-Freezing model outputs before matches and tracking their subsequent performance, calibration and stability.
+Freezing model outputs before matches and tracking their subsequent performance, calibration, integrity and temporal stability.
 
 ### Daily Betting Desk
 
@@ -223,7 +267,8 @@ The project deals with practical engineering problems that become important once
 - preventing historical analysis from using information unavailable before a match;
 - preserving immutable prospective decisions;
 - keeping the desktop interface responsive while analysis runs in the background;
-- combining model, price, risk and portfolio layers without silently changing the underlying model output.
+- combining model, price, risk and portfolio layers without silently changing the underlying model output;
+- monitoring calibration drift without automatically reacting to short-term noise.
 
 ## Development approach
 
@@ -235,17 +280,18 @@ The current approach emphasises:
 - **explainability** — useful models should be understandable, not just numerically attractive;
 - **out-of-sample discipline** — model selection and final evaluation remain separate;
 - **prospective evidence** — historical backtests are supplemented by frozen forward observations;
+- **temporal monitoring** — validated models are observed through time instead of assumed to remain stationary;
 - **responsive UX** — long operations need progress, cancellation where appropriate and clear state feedback;
 - **scalability** — data structures and imports must remain workable as the database grows;
 - **incremental refinement** — new capabilities are added and validated in controlled steps.
 
 ## Project status
 
-🟠 **Active development — latest validated milestone: v1.05**
+🟠 **Active development — latest validated milestone: v1.06**
 
-The application is already being used to collect and analyse real football data, run model searches, freeze prospective predictions and generate simulated analytical shortlists from current odds.
+The application is already being used to collect and analyse real football data, run model searches, freeze prospective predictions, generate simulated analytical shortlists from current odds and monitor whether validated Champions remain stable as prospective evidence accumulates.
 
-The next development stages continue to focus on accumulating prospective evidence, monitoring Champion health and strengthening decision auditing before any consideration of real-money automation.
+The next development stages focus on decision trace/explainability, prospective Challenger comparison, formal Champion-promotion gates, price/CLV monitoring and stronger portfolio intelligence before any consideration of real-money automation.
 
 ## Screenshots
 
@@ -257,7 +303,7 @@ The main interface separates daily decisions from data maintenance and research 
 
 ### Observable long-running operations
 
-Coverage and other heavy local analyses now show the current stage, elapsed time and visible progress while keeping the interface responsive.
+Coverage and other heavy local analyses show the current stage, elapsed time and visible progress while keeping the interface responsive.
 
 ![Football Hunter v1.05 coverage analysis with visible progress](docs/images/v105-coverage-progress.png)
 
