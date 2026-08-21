@@ -5,7 +5,7 @@
 ![VB.NET](https://img.shields.io/badge/VB.NET-.NET%2010-512BD4?logo=dotnet&logoColor=white)
 ![WinForms](https://img.shields.io/badge/UI-WinForms-512BD4)
 ![API](https://img.shields.io/badge/data-API--driven-0A66C2)
-![Version](https://img.shields.io/badge/validated-v1.06-16A34A)
+![Version](https://img.shields.io/badge/validated-v1.07-16A34A)
 ![Status](https://img.shields.io/badge/status-active%20development-orange)
 
 ## About the project
@@ -16,15 +16,67 @@ The project combines historical match data, pre-match information and betting-ma
 
 This repository is the **public showcase** for the project. The application source code, local data store, API credentials and proprietary datasets remain private.
 
-## Current milestone — v1.06
+## Current milestone — v1.07
 
-Version **1.06** adds a temporal **Drift & Stability Monitor** on top of the prospective Champion-monitoring workflow introduced in v1.05.
+Version **1.07** adds **Decision Trace / Explainability** to the prospective workflow.
 
-The goal is to answer a question that historical backtests alone cannot answer reliably: **is a validated model still behaving in the same way over time?**
+The goal is to answer a simple but important question for any current or previously frozen signal:
 
-The monitor uses only predictions that were frozen prospectively before matches. It does not recalibrate, replace or disable models automatically.
+**Why did Football Hunter make this recommendation — or why did it refuse to promote it?**
 
-For each active Champion, Football Hunter now compares recent and previous chronological windows using:
+A selected row can now be traced through the full analytical chain:
+
+`Champion -> probability -> price/audit -> Opportunity Scanner -> Daily Betting Desk`
+
+The trace is read-only. It does not recalculate the economic decision, change the frozen model, alter the stake, rewrite a snapshot or modify a policy.
+
+### What the trace exposes
+
+For a selected recommendation, Football Hunter can show:
+
+- the Champion Registry ID and immutable model fingerprint;
+- raw model probability and the probability actually used by the pipeline;
+- stored base rate and probability-coherence method;
+- model fair odds and current execution price;
+- market probability, edge and expected value;
+- bookmaker coverage, market margin, price spread and quote age;
+- price quality, domain/applicability and audit decision;
+- Opportunity Scanner state, tier, score, tail-risk classification and conflicts;
+- the Daily Betting Desk promotion decision, rank and simulated stake/caps;
+- the exact Prediction, Fair Odds and Scanner run IDs behind the decision.
+
+The same trace can also be opened from the **prospective ledger**, so an observation that was frozen earlier can be inspected against the specific pipeline snapshots that originally produced it rather than against whatever the latest analysis happens to be.
+
+### Feature-level explanation
+
+When the original model fingerprint and the current frozen Champion still match, Football Hunter can also reconstruct the contribution of the Champion's selected features.
+
+The feature view exposes:
+
+- observed pre-match feature value;
+- frozen training mean and standard deviation;
+- standardised Z value;
+- model weight;
+- contribution in logit units;
+- whether that contribution increased or reduced the model probability.
+
+A mathematical sanity check then reconstructs the raw model probability from the stored base-rate intercept plus the feature contributions.
+
+During v1.07 validation, one tested recommendation reconstructed the frozen raw probability with a **0.000 percentage-point difference** from the stored snapshot.
+
+Older observations remain auditable even when feature-level reconstruction is no longer safe. The exact Prediction/Fair/Scanner chain remains available, while the feature section is explicitly marked partial instead of inventing a retrospective explanation.
+
+## v1.06 — temporal model monitoring
+
+Version **1.06** introduced a temporal **Drift & Stability Monitor** on top of the prospective Champion-monitoring workflow.
+
+The goal is to answer a different question that historical backtests alone cannot answer reliably:
+
+**Is a validated model still behaving in the same way over time?**
+
+The monitor uses only predictions frozen prospectively before matches and does not recalibrate, replace or disable models automatically.
+
+For each active Champion, Football Hunter compares recent and previous chronological windows using:
 
 - Brier score;
 - calibration error (ECE);
@@ -34,26 +86,13 @@ For each active Champion, Football Hunter now compares recent and previous chron
 - observed outcome frequency;
 - model/cohort fingerprint integrity.
 
-The current diagnostic states are:
+At the v1.06 validation point, the four active Champions had **892 resolved prospective observations in total**, all four had comparable temporal windows and cohort integrity remained **OK**. Two models were flagged for stronger deterioration review and two for monitoring. These are diagnostic signals, not automatic model-replacement decisions.
 
-- **Collecting** — insufficient prospective observations;
-- **Descriptive** — enough data for an initial temporal comparison, but not for formal alerts;
-- **Stable** — no current monitoring threshold is triggered;
-- **Watch** — one or more monitoring thresholds deserve attention;
-- **Deterioration** — a stronger threshold is exceeded and the model should be reviewed manually;
-- **Integrity** — the prospective cohort no longer matches the active frozen model fingerprint.
-
-At the v1.06 validation point, the four active Champion models had **892 resolved prospective observations in total**, all four had two comparable temporal windows and cohort integrity remained **OK**. Two models were flagged for stronger deterioration review and two for monitoring. These are diagnostic signals, not claims of profitability and not automatic model-replacement decisions.
-
-### Temporal windows
-
-The detailed view also exposes non-overlapping chronological blocks of 20 resolved predictions. This makes it possible to inspect how calibration and predictive error evolved through time rather than relying only on one aggregate score.
-
-The latest incomplete block is explicitly shown as **forming**, so partial windows are not silently treated as complete samples.
+The detailed view also exposes chronological blocks of 20 resolved predictions, including an explicitly marked forming block when a window is incomplete.
 
 ## v1.05 — observable daily workflow
 
-The previous milestone turned Football Hunter's growing set of research tools into a clearer, observable daily workflow.
+The previous v1.05 milestone turned Football Hunter's growing set of research tools into a clearer, observable daily workflow.
 
 The main navigation is organised around three distinct areas:
 
@@ -81,7 +120,7 @@ The result is split between:
 
 The Daily Betting Desk remains a **research and paper-simulation layer**. It does not place real bets.
 
-The smart odds-refresh pipeline prioritises the most relevant Scanner signals and prices closest to expiry while protecting the API quota. It does not try to keep every price below an arbitrary freshness threshold.
+Version 1.07 now makes both of those outcomes explainable row by row.
 
 ### Prospective ledger
 
@@ -97,11 +136,7 @@ The ledger keeps:
 
 Repeated analyses therefore remain auditable without counting the same recommendation multiple times in the primary performance statistics.
 
-### Champion health
-
-Champion-level health screens combine the frozen model Registry with prospective calibration, maturity, reliability, coverage and fingerprint integrity.
-
-Version 1.06 extends that health layer from an aggregate snapshot into explicit time-window monitoring.
+Version 1.07 can open a frozen ledger observation and recover the Prediction, Fair Odds and Scanner snapshots that originally generated it.
 
 ## Prospective validation
 
@@ -122,7 +157,8 @@ The current workflow includes:
 - calibration monitoring;
 - cohort-integrity auditing;
 - Champion health monitoring;
-- temporal drift and stability monitoring.
+- temporal drift and stability monitoring;
+- decision trace and model explainability.
 
 ## Model discovery and Champion workflow
 
@@ -161,6 +197,7 @@ Important evaluation concepts include:
 - ROI and robustness;
 - minimum sample-size requirements;
 - temporal stability;
+- explainability and decision provenance;
 - prevention of data leakage.
 
 A high historical hit rate by itself is not considered sufficient evidence that a model is useful.
@@ -192,6 +229,8 @@ These layers are deliberately read-only or simulated and do not alter historical
 - Freeze prospective predictions and audit their integrity later.
 - Compare model probability with fair and available market prices.
 - Rank current opportunities while explaining why alternatives were rejected.
+- Reconstruct the analytical path behind a current or frozen decision.
+- Explain how individual Champion features contributed to a model output when safe to do so.
 - Monitor whether validated models remain stable through time.
 - Keep historical calculations free from future information.
 
@@ -211,7 +250,8 @@ These layers are deliberately read-only or simulated and do not alter historical
 | v1.03 | Calibration-cohort integrity audit |
 | v1.04 | Configurable Daily Betting Desk and ranked period shortlist |
 | v1.05 | Smart odds refresh, prospective ledger, Champion health, observable progress and simplified navigation |
-| **v1.06** | **Champion drift and stability monitoring with chronological prospective windows** |
+| v1.06 | Champion drift and stability monitoring with chronological prospective windows |
+| **v1.07** | **Decision Trace: explainable model, price, Scanner and Daily Desk decisions with feature-level sanity checking** |
 
 ## Application areas
 
@@ -238,6 +278,10 @@ Automatically searching a much larger model space than would be practical throug
 ### Prospective monitoring
 
 Freezing model outputs before matches and tracking their subsequent performance, calibration, integrity and temporal stability.
+
+### Explainability
+
+Tracing a signal through the model, market audit, Scanner and Daily Desk layers, with feature contributions and run-level provenance when available.
 
 ### Daily Betting Desk
 
@@ -268,7 +312,8 @@ The project deals with practical engineering problems that become important once
 - preserving immutable prospective decisions;
 - keeping the desktop interface responsive while analysis runs in the background;
 - combining model, price, risk and portfolio layers without silently changing the underlying model output;
-- monitoring calibration drift without automatically reacting to short-term noise.
+- monitoring calibration drift without automatically reacting to short-term noise;
+- keeping an explainability layer faithful to frozen decisions instead of retroactively inventing reasons.
 
 ## Development approach
 
@@ -277,7 +322,7 @@ Football Hunter is developed iteratively, with frequent small releases and direc
 The current approach emphasises:
 
 - **data integrity first** — statistical conclusions are only as good as the underlying data;
-- **explainability** — useful models should be understandable, not just numerically attractive;
+- **explainability** — useful models and decisions should be inspectable, not just numerically attractive;
 - **out-of-sample discipline** — model selection and final evaluation remain separate;
 - **prospective evidence** — historical backtests are supplemented by frozen forward observations;
 - **temporal monitoring** — validated models are observed through time instead of assumed to remain stationary;
@@ -287,11 +332,11 @@ The current approach emphasises:
 
 ## Project status
 
-🟠 **Active development — latest validated milestone: v1.06**
+🟠 **Active development — latest validated milestone: v1.07**
 
-The application is already being used to collect and analyse real football data, run model searches, freeze prospective predictions, generate simulated analytical shortlists from current odds and monitor whether validated Champions remain stable as prospective evidence accumulates.
+The application is already being used to collect and analyse real football data, run model searches, freeze prospective predictions, generate simulated analytical shortlists from current odds, monitor whether validated Champions remain stable and inspect the full provenance of individual decisions.
 
-The next development stages focus on decision trace/explainability, prospective Challenger comparison, formal Champion-promotion gates, price/CLV monitoring and stronger portfolio intelligence before any consideration of real-money automation.
+The next development stages focus on **prospective Challenger comparison**, a formal **Champion promotion gate**, price/CLV monitoring and stronger portfolio intelligence while prospective evidence continues to accumulate.
 
 ## Screenshots
 
